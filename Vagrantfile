@@ -21,7 +21,7 @@ Vagrant::Config.run do |config|
     }
 
     chef.run_list = [
-      'recipe[uptimely::devsetup]',
+      'recipe[ruby_quick_installer]',
       'recipe[uptimely::default]'
     ]
   end
