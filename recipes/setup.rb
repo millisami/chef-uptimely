@@ -1,0 +1,100 @@
+#
+# Cookbook Name:: nodeuptime
+# Recipe:: setup
+#
+# Copyright (C) 2013 YOUR_NAME
+#
+# All rights reserved - Do Not Redistribute
+#
+
+include_recipe "nodejs::install_from_source"
+node.override['nodejs']['version'] = '0.8.21'
+node.override['nodejs']['checksum'] = '65ab7307f1aee12be4c88e396e2510967a52b1c6'
+
+include_recipe "mongodb::10gen_repo"
+include_recipe "git"
+
+group node['nodeuptime']['group']
+user node['nodeuptime']['user'] do
+  action :create
+  comment "Deployer user"
+  uid 1000
+  gid node['nodeuptime']['group']
+  shell "/bin/bash"
+  home "/home/#{node['nodeuptime']['user']}"
+  password node['nodeuptime']['password']
+  supports :manage_home => true
+  system true
+end
+
+deploy_revision node['nodeuptime']['deploy_to'] do
+  repo            "git://github.com/fzaninotto/uptime"
+  revision        node['nodeuptime']['revision']
+  user            node['nodeuptime']['user']
+  migrate         false
+  environment     "NODE_ENV" => "production" #, "OTHER_ENV" => "foo"
+  shallow_clone   true
+  action          :deploy # or :rollback
+  symlinks({})
+  symlink_before_migrate({})
+  before_restart do
+    execute "npm-install" do
+      cwd release_path
+      user node['nodeuptime']['owner']
+      group node['nodeuptime']['group']
+      command "npm install"
+      environment ({'NODE_ENV' => 'production'})
+    end
+  end
+end
+
+template "#{node['nodeuptime']['deploy_to']}/current/config/production.yaml" do
+  source  "config.yaml.erb"
+  owner   node['nodeuptime']['user']
+  group   node['nodeuptime']['group']
+  mode    00644
+  # variables( :config_var => node[:configs][:config_var] )
+end
+
+directory "#{node['nodeuptime']['deploy_to']}/shared/pids" do
+  owner node['nodeuptime']['user']
+  group "root"
+  mode 00775
+  action :create
+end
+
+file "#{node['nodeuptime']['deploy_to']}/shared/pids/#{node['nodeuptime']['name']}.pid" do
+  action :create_if_missing
+  owner node['nodeuptime']['user']
+  mode 00755
+end
+
+directory "#{node['nodeuptime']['deploy_to']}/shared/log" do
+  owner node['nodeuptime']['user']
+  group "root"
+  mode 00775
+  action :create
+end
+
+file "#{node['nodeuptime']['deploy_to']}/shared/log/#{node['nodeuptime']['name']}.log" do
+  action :create_if_missing
+  owner node['nodeuptime']['user']
+  mode 00755
+end
+
+template "/etc/init/#{node['nodeuptime']['name']}.conf" do
+  mode '0755'
+  owner "root"
+  group "root"
+  source "uptime.init.conf.erb"
+end
+
+service "#{node['nodeuptime']['name']}" do
+  provider Chef::Provider::Service::Upstart
+  supports :start => true, :stop => true, :restart => true, :status => true
+  action :nothing
+end
+
+service "#{node['nodeuptime']['name']}" do
+  action :restart
+end

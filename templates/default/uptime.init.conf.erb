@@ -1,0 +1,38 @@
+#!upstart
+
+description "<%= node['nodeuptime']['name'] %> app"
+author      "millisami"
+
+start on (local-filesystems and net-device-up IFACE=eth0)
+stop  on shutdown
+
+respawn                # restart when job dies
+respawn limit 5 60     # give up restart after 5 respawns in 60 seconds
+
+script
+  export NODE_ENV=production
+  echo $$ > <%= "#{node['nodeuptime']['deploy_to']}/shared/pids/#{node['nodeuptime']['name']}.pid" %>
+  exec sudo -u <%= node['nodeuptime']['user'] %> sh -c "cd <%= "#{node['nodeuptime']['deploy_to']}/current" %>;/usr/local/bin/node <%= node['nodeuptime']['deploy_to'] %>/current/app.js >> <%= "#{node['nodeuptime']['deploy_to']}/shared/log/#{node['nodeuptime']['name']}.log" %> 2>&1"
+end script
+
+pre-start script
+    # Date format same as (new Date()).toISOString() for consistency
+    echo "[`date -u +%Y-%m-%dT%T.%3NZ`] (sys) Starting" >> <%= "#{node['nodeuptime']['deploy_to']}/shared/log/#{node['nodeuptime']['name']}.log" %>
+end script
+
+pre-stop script
+    rm /var/run/yourprogram.pid
+    echo "[`date -u +%Y-%m-%dT%T.%3NZ`] (sys) Stopping" >> <%= "#{node['nodeuptime']['deploy_to']}/shared/log/#{node['nodeuptime']['name']}.log" %>
+end script
+
+
+# Another alternative way for script block
+# http://kvz.io/blog/2009/12/15/run-nodejs-as-a-service-on-ubuntu-karmic/
+#script
+#  set -e
+#  mkfifo /tmp/api2-log-fifo
+#  ( logger -t api2 </tmp/api2-log-fifo & )
+#  exec >/tmp/api2-log-fifo
+#  rm /tmp/api2-log-fifo
+#  exec sudo -u www-data MASTERKEY=`cat /transloadit/keys/masterkey` /transloadit/bin/server 2>&1
+#end script

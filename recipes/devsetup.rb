@@ -1,5 +1,8 @@
 # Helper recipe to install ruby while cooking
 # This is added in the run_list in the Vagrantfile while cooking this cookbook
+# Users of this cookbook does not have to include this recipe
+
+include_recipe "omnibus_updater"
 
 package "python-software-properties"
 
