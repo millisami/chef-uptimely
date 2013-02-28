@@ -1,6 +1,6 @@
 #!upstart
 
-description "<%= node['nodeuptime']['name'] %> app"
+description "<%= node['uptimely']['name'] %> app"
 author      "millisami"
 
 start on (local-filesystems and net-device-up IFACE=eth0)
@@ -11,18 +11,18 @@ respawn limit 5 60     # give up restart after 5 respawns in 60 seconds
 
 script
   export NODE_ENV=production
-  echo $$ > <%= "#{node['nodeuptime']['deploy_to']}/shared/pids/#{node['nodeuptime']['name']}.pid" %>
-  exec sudo -u <%= node['nodeuptime']['user'] %> sh -c "cd <%= "#{node['nodeuptime']['deploy_to']}/current" %>;/usr/local/bin/node <%= node['nodeuptime']['deploy_to'] %>/current/app.js >> <%= "#{node['nodeuptime']['deploy_to']}/shared/log/#{node['nodeuptime']['name']}.log" %> 2>&1"
+  echo $$ > <%= "#{node['uptimely']['deploy_to']}/shared/pids/#{node['uptimely']['name']}.pid" %>
+  exec sudo -u <%= node['uptimely']['user'] %> sh -c "cd <%= "#{node['uptimely']['deploy_to']}/current" %>;/usr/local/bin/node <%= node['uptimely']['deploy_to'] %>/current/app.js >> <%= "#{node['uptimely']['deploy_to']}/shared/log/#{node['uptimely']['name']}.log" %> 2>&1"
 end script
 
 pre-start script
     # Date format same as (new Date()).toISOString() for consistency
-    echo "[`date -u +%Y-%m-%dT%T.%3NZ`] (sys) Starting" >> <%= "#{node['nodeuptime']['deploy_to']}/shared/log/#{node['nodeuptime']['name']}.log" %>
+    echo "[`date -u +%Y-%m-%dT%T.%3NZ`] (sys) Starting" >> <%= "#{node['uptimely']['deploy_to']}/shared/log/#{node['uptimely']['name']}.log" %>
 end script
 
 pre-stop script
     rm /var/run/yourprogram.pid
-    echo "[`date -u +%Y-%m-%dT%T.%3NZ`] (sys) Stopping" >> <%= "#{node['nodeuptime']['deploy_to']}/shared/log/#{node['nodeuptime']['name']}.log" %>
+    echo "[`date -u +%Y-%m-%dT%T.%3NZ`] (sys) Stopping" >> <%= "#{node['uptimely']['deploy_to']}/shared/log/#{node['uptimely']['name']}.log" %>
 end script
 
 

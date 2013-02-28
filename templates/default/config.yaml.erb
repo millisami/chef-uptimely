@@ -1,6 +1,6 @@
 mongodb:
   server:   localhost
-  database: <%= node['nodeuptime']['dbname'] %>
+  database: <%= node['uptimely']['dbname'] %>
   user:     root
   password:
   connectionString:       # alternative to setting server, database, user and password separately
@@ -20,4 +20,4 @@ analyzer:
 autoStartMonitor: true
 
 server:
-  port: <%= node['nodeuptime']['server']['port'] %>
+  port: <%= node['uptimely']['server']['port'] %>

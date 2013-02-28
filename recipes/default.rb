@@ -1,5 +1,5 @@
 #
-# Cookbook Name:: nodeuptime
+# Cookbook Name:: uptimely
 # Recipe:: default
 #
 # Copyright (C) 2013 YOUR_NAME
@@ -7,5 +7,5 @@
 # All rights reserved - Do Not Redistribute
 #
 
-include_recipe "nodeuptime::setup"
-include_recipe "nodeuptime::web"
+include_recipe "uptimely::setup"
+include_recipe "uptimely::web"

@@ -2,7 +2,7 @@ require 'berkshelf/vagrant'
 
 Vagrant::Config.run do |config|
 
-  config.vm.host_name = "nodeuptime-berkshelf"
+  config.vm.host_name = "uptimely-berkshelf"
 
   config.vm.box = "Opscode-12-04"
 
@@ -15,18 +15,18 @@ Vagrant::Config.run do |config|
 
   config.vm.provision :chef_solo do |chef|
     chef.json = {
-      :nodeuptime => {
+      :uptimely => {
         :domains => ['33.33.33.40']
       }
     }
 
     chef.run_list = [
-      'recipe[nodeuptime::devsetup]',
-      'recipe[nodeuptime::default]'
+      'recipe[uptimely::devsetup]',
+      'recipe[uptimely::default]'
     ]
   end
   cache_dir = local_cache(config.vm.box)
-config.vm.share_folder "v-cache", "/var/cache/apt/archives/", cache_dir
+  config.vm.share_folder "v-cache", "/var/cache/apt/archives/", cache_dir
 
 end
 
